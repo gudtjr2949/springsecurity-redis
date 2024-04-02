@@ -3,20 +3,20 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${DB_URL}/userDB?serverTimezone=Asia/Seoul
     username: ${DB_USER}
-    password: ${DB_PW}
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
+
   driver:
     path: chromedriver
   jwt:
     secret: ${JWT_KEY}
     token:
-      access-expiration-time: 43200000    # 12시간
+      access-expiration-time: 60000    # 1분
       refresh-expiration-time: 604800000   # 7일
 
   data:

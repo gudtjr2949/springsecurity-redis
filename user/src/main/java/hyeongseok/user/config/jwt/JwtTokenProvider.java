@@ -10,11 +10,13 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
@@ -50,7 +52,7 @@ public class JwtTokenProvider {
     /**
      * Refresh Token 생성
      */
-    public String generateRefreshToken(Authentication authentication){
+    public void generateRefreshToken(Authentication authentication){
         Claims claims = Jwts.claims().setSubject(authentication.getName());
         Date now = new Date();
         Date expireDate = new Date(now.getTime() + refreshExpirationTime);
@@ -69,8 +71,6 @@ public class JwtTokenProvider {
                 refreshExpirationTime,
                 TimeUnit.MILLISECONDS
         );
-
-        return refreshToken;
     }
 
     /**
@@ -95,11 +95,14 @@ public class JwtTokenProvider {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return true;
         } catch(ExpiredJwtException e) {
-            log.error("Access Token 만료");
-            return false;
+            log.error("Token 만료");
+            throw new RuntimeException("Token 만료. 재발급 필요");
         } catch(JwtException e) {
             log.error("잘못된 Access Token 타입");
             throw new RuntimeException("잘못된 Access Token 타입");
+        } catch (IllegalArgumentException e) {
+            log.error("헤더가 비어있음");
+            throw new RuntimeException("헤더가 비어있음");
         }
     }
 }
